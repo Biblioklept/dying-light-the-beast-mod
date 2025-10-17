@@ -4,7 +4,7 @@ sub main()
 	Param("ManualSloMoCooldown", "5.0");  
 	
 	// WallRun Front
-    Param("WallRunFrontEnabled", "false");
+    Param("WallRunFrontEnabled", "true");
 	Param("WallRunFrontPeakDelay", "0.5");    
     Param("WallRunFrontHeightNitro", "2.0");
 	Param("WallRunFrontHeight", "1.0");
@@ -13,7 +13,7 @@ sub main()
     Param("WallRunFrontWallAdditionalOffset", "1.0");    
     
     // WallRun Side
-    Param("WallRunSideEnabled", "false");
+    Param("WallRunSideEnabled", "true");
 	Param("WallRunSideMinAngleToStart", "-90.0");
     Param("WallRunSideMaxAngleToStart", "-14.5");
     Param("WallRunSideNitroSprintSpeedMod", "1.05");
@@ -33,7 +33,7 @@ sub main()
 	
     // WallRun Common
 	Param("WallRunSloMoDuration", "0.0");    
-    Param("WallRunMaxSequence", "3");    
+    Param("WallRunMaxSequence", "3"); // vanilla Param("WallRunMaxSequence", "1");  
     Param("WallRunTimeTolleranceFromSprint", "99999.0");
 	Param("WallRunExtraGravityWhenAscending", "-9.8");	
 	Param("WallRunMinTimeBetweenWallrun", "0.3");
@@ -41,7 +41,7 @@ sub main()
 	Param("WallRunKickEnabled", "true");
 	
     // WallJump Front
-    Param("WallJumpFrontEnabled", "false");    
+    Param("WallJumpFrontEnabled", "true");    
 	Param("WallJumpFrontLookForwardEnabled", "false");
     Param("WallJumpFrontSpeed", "6.0");
 	Param("WallJumpFrontRotateEnabled", "false"); 	
@@ -308,7 +308,7 @@ sub main()
 	Param("BossDamageScaling4Players", "3.0");
     
 	Param("WrestlingKick", "0");
-    Param("WrestlingKickDoubleInputRequired", "true");
+    Param("WrestlingKickDoubleInputRequired", "false");
 	Param("WrestlingKickExtraGravity", "-5.0"); 
 	Param("WrestlingKickExtraGravityDuration", "0.45"); //0.5
 	Param("WrestlingKickHittedExtraGravity", "3.5"); //0.8
@@ -384,7 +384,7 @@ sub main()
 	Param("ParkourStaminaSlopeStruggleAdditional", "0.0"); // when tappping to fight against the slope it will decrease this value every second of struggle	    
 	Param("SwimSecondsUnderWater", "45");
 	Param("SwimStaminaUsage", "0.075");	
-	Param("SwimNitroAvailable", "true");
+	Param("SwimNitroAvailable", "true");  // vanilla Param("SwimNitroAvailable", "true");
 	Param("CustomMoveSlowVersionIfExist", "true");		
 	
 	
@@ -398,21 +398,21 @@ sub main()
 	Param("StaminaHeavyBreathLevelMax", "0.3");
     Param("MaxStamina", "0.80");
 	Param("MaxStaminaMultiplier", "1.0");
-    Param("MaxStaminaMinRegenerationTime", "2.0");    
-	Param("MaxStaminaMaxRegenerationTime", "2.0");
-    Param("MaxStaminaTimeToRegenerate", "0.8");
+    Param("MaxStaminaMinRegenerationTime", "1.65"); // vanilla value 2.0
+	Param("MaxStaminaMaxRegenerationTime", "1.65"); // vanilla value 2.0
+    Param("MaxStaminaTimeToRegenerate", "1.0");
     Param("MaxStaminaDrainFactor", "1.0");
     Param("MaxStaminaDrainEnabled", "true");
     Param("ExhaustedStateEndStaminaThreshold", "0.5");
     Param("StaminaMovementDrainFactor", "1.0");
     Param("MinStaminaLevelFromHit", "0.0");
-    Param("StaminaTimeToRegenerateOnEmpty", "1.5");
-    Param("AdvancedStaminaTimeToRegenerateOnEmpty", "1.7");
-    Param("StaminaTimeToRegenerateOnEmptyAfterParokur", "2.5");          // NOT WORKING IN COMBAT  -time needed to fully restore stamina when completely depleted
-    Param("StaminaTimeToRegenerate", "0.75");                 // time after which stamina starts to regenerate if player still has some stamina left
-    Param("AdvancedStaminaTimeToRegenerate", "0.25");
-    Param("StaminaTimeToRegenerateAfterParkour", "0.75");     // time after which stamina starts to regenerate if player still has some stamina left
-    Param("StaminaRegeneration", "0.65");                    // WARNING CHANGED SO EVERY THING IS IN SECONDS rate at which stamina regenerates in seconds to full bar!!
+    Param("StaminaTimeToRegenerateOnEmpty", "1.45"); // vanilla value 2.5
+    Param("AdvancedStaminaTimeToRegenerateOnEmpty", "1.45"); // vanilla value 2.5
+    Param("StaminaTimeToRegenerateOnEmptyAfterParokur", "1.35");          // NOT WORKING IN COMBAT  -time needed to fully restore stamina when completely depleted
+    Param("StaminaTimeToRegenerate", "0.65");                 // time after which stamina starts to regenerate if player still has some stamina 
+    Param("AdvancedStaminaTimeToRegenerate", "0.45"); // vanilla value 0.75
+    Param("StaminaTimeToRegenerateAfterParkour", "0.55"); // vanilla value 0.75 time after which stamina starts to regenerate if player still has some stamina
+    Param("StaminaRegeneration", "0.75");       // vanilla value 1.0 WARNING CHANGED SO EVERY THING IS IN SECONDS rate at which stamina regenerates in seconds to full bar!!
 	Param("StaminaRegenerationOutsideDanger", "1.0");
     Param("StaminaRegenerationRelative", "2.0");
     Param("StaminaRegenerationRelativeOutsideDanger", "2.0");
@@ -429,7 +429,7 @@ sub main()
     Param("StaminaRegenerationExhaustedRelativeOutsideDanger", "1.75");
     Param("AdvancedStaminaEmptyHitStaminaFactor", "1.0");
     Param("AdvancedStaminaSwitchItemDurationMultiplier", "2.0");
-	Param("KickDisabled","0");
+	Param("KickDisabled","0"); // not present in vanilla
 	
     Param("ExtraJumpsInAir", "0");
 
@@ -439,7 +439,7 @@ sub main()
     Param("StaminaCanFullyDrain", "1");                      // Does the player stamina perform the fully drained logic
     Param("StaminaWarningLevel", "0.75");                       // Hud will warn user they are low stamina at this level
     Param("ParryDamageMult", "Player_ParryDamageMult");
-    Param("VulnerableHumanGrabStaminaRecover", "0.25");      // Player recovers some stamina if hit by a human grab attack        
+    Param("VulnerableHumanGrabStaminaRecover", "0.35");      // vanilla value 0.25 - Player recovers some stamina if hit by a human grab attack        
 
 	Param("DashAndAfterboostPostprocessMax", "0.33");
 	Param("SprintNitroStopAngleMoveInput", "20.0");
@@ -472,17 +472,17 @@ sub main()
 	
 	Param("CanRecieveXPProficiency", "1");
     Param("SprintExhausted", "1");
-	Param("ExhaustedMoveMaxSpeedFactor", "0.88");
+	Param("ExhaustedMoveMaxSpeedFactor", "0.88"); // vanilla value 0.66
     Param("TackleTimeToRegenOnEmpty", "3.0");
     Param("MoveSprintStaminaConsumption", "0.0");
     Param("MoveSpeedFitnessFactor", "0.6");
     Param("MoveSpeedFitnessFactorTime", "5.0");
-    Param("XrayEffectProbability", "0.15");
+    Param("XrayEffectProbability", "0.65"); // vanilla value 0.0
     Param("XRayVisEffectRadius", "0.7");
     Param("XRayVisEffectDuration", "1.5");
     Param("XRayEffectDuration", "0.3");  
-    Param("EnableXray", "1");
-    Param("EnableXRayEffectOnAllHits", "false");
+    Param("EnableXray", "1"); // vanilla value 0
+    Param("EnableXRayEffectOnAllHits", "false"); // 
     Param("DisableXRaySlowMoLimit", "false");
     Param("SlowMoProbability", "0");
 	Param("SlowMoLastGroupTime", "30.0");
@@ -512,10 +512,10 @@ sub main()
     Param("MeleeVerticalPhysicalDamageMul", "1.5");
 	Param("MeleeBluntRagdollEveryXHit", "0");
     // KICK STAMINA USAGE
-    Param("KickStaminaUsage", "0.20");
+    Param("KickStaminaUsage", "0.20"); // vanilla value 0.675
     // WRESTLING KICK
     Param("WrestlingKickRangeMul", "1.3");
-    Param("WrestlingKickStaminaUsage", "1.75");
+    Param("WrestlingKickStaminaUsage", "1.75"); // vanilla value 2.0
     Param("WrestlingKickCooldown", "-1.0");
     Param("AirKickBaseDamageMul", "Player_AirKickBaseDamageMul");
     Param("AirKickPhysicsDamage", "2.0");
@@ -608,7 +608,7 @@ sub main()
 	Param("FOVCorrection", "0.0");
     Param("CameraDefaultFOV", "73.0");
     Param("BulletHitMissEffects", "1.0");
-    Param("HideWeaponsDuringSprintDelay", "4.0");
+    Param("HideWeaponsDuringSprintDelay", "99999.0"); // vanilla value 6.0 - value determines how long it takes to sheathe weapon in seconds after player starts sprinting
     Param("HideWeaponsDuringCrouchDelay", "-1.0");
     Param("HealingMovementSpeedMul", "0.5");
 	Param("NightVisionEnabled", "0");
@@ -624,7 +624,7 @@ sub main()
 	Param("HealthCriticalPPOutTime", "3.0");
 	Param("HealthCriticalAnimationSpeed", "3.0");
 	Param("HealthCriticalLevel", "0.333");
-	Param("MaxAutoRegenHealthPercent", "45");
+	Param("MaxAutoRegenHealthPercent", "45"); // vanilla value 34 - maximum amount health can regenerate in % to without healing items
 	
 	Param("HealthCriticalMaxLevel", "1");
 
@@ -636,7 +636,7 @@ sub main()
     Param("HealthAutoHealEnabled", "true");
     //Param("HealthRegenerationMaxLevel", "HealthRegenerationMaxLevel");               // Regenerates health up to this value. Post process depends on LowHealthEffectThreshold 
     Param("LowHealthEffectThreshold", "0.95");                // Defines the value of health when critical health post process is working, based on HealthCriticalLevel
-    Param("HealthRegenerationDelay", "6.25");                 // Time after which player starts to regenerate, measured from last hit
+    Param("HealthRegenerationDelay", "5.25");                 // vanilla value 7.0 - Time after which player starts to regenerate, measured from last hit
     Param("HealthPerSecond", "");                           // Amount of health being regenerated each second, to be used as auto heal skill
     Param("AfterDeathHealthRegenTime", "240");               // Time it takes to regenerate full health after respawn
     Param("AfterDeathHealthFactor", "Player_AfterDeathHealth");   // Part of MaxHealth restored after respawn
@@ -655,24 +655,24 @@ sub main()
     Param("AmmoSlotsCount", "24"); // limited max is 100
     Param("StorageAmmoSlotsCount", "100");
     Param("SwimFallMinSpeed", "5.5");
-    Param("SwimMoveSpeed", "2.5");
-    Param("SwimSprintSpeed", "4.0");
+    Param("SwimMoveSpeed", "3.5"); // vanilla value 2.5
+    Param("SwimSprintSpeed", "6.0"); // vanilla value 4.0
     Param("SwimImpulsSpeed", "2.0");
-    Param("SwimStrafeSpeed", "0.7");
-    Param("SwimAcceleration", "0.7");
+    Param("SwimStrafeSpeed", "1.2"); // vanilla value 0.7
+    Param("SwimAcceleration", "1.2"); // vanilla value 0.7
 	Param("SwimUpAcceleration", "2.1");
     Param("SprintEffects", "0.9");
 	Param("SprintEffectsInPGandRG", "1.25");	
     Param("SprintWithoutInput", "1");
     Param("SprintNitroAcceleration", "10");
-    Param("SprintNitroFovMul", "0.0");
+    Param("SprintNitroFovMul", "0.0"); // vanilla value 2.0
     Param("SprintNitroMaxSpeedAdd", "0.6");
     Param("SprintAutoStartTime", "0.1");
     Param("SprintNitroAccelerationSlowdownMod", "0.5");
     Param("MoveForwardMinSpeed", "0.5");
-    Param("MoveForwardMaxSpeed", "3.5");                // DL: 3.5, PREPROD: 3.0
-    Param("MoveBackwardMinSpeed", "0.5");
-    Param("MoveBackwardMaxSpeed", "1.6");             // DL: 2.5, PREPROD: 2.0
+    Param("MoveForwardMaxSpeed", "2.8");                // vanilla value 3.5
+    Param("MoveBackwardMinSpeed", "0.65");             // vanilla value 0.5
+    Param("MoveBackwardMaxSpeed", "1.85");             // vanilla value 1.6
 	Param("StorageEquipmentSlotsCount", "100");
     Param("StorageConsumamblesSlotsCount", "100");
     Param("StorageOtherSlotsCount", "250");
@@ -691,10 +691,10 @@ sub main()
     Param("ChargeMoveSpeedDeactivationTime", "0");
 
     Param("MoveStrafeMinSpeed", "0.5");
-    Param("MoveStrafeMaxSpeed", "2.5");                // DL: 2.5, PREPROD: 2.5
-    Param("MoveSprintMinSpeed", "4.5");
-    Param("MoveSprintSpeed", "5.0");
-    Param("MoveAcceleration", "20.0");                // DL: 40.0, PREPROD: 20.0
+    Param("MoveStrafeMaxSpeed", "1.8");                // vanilla value 2.5
+    Param("MoveSprintMinSpeed", "5.25");              // vanilla value 4.5
+    Param("MoveSprintSpeed", "5.5");                  // vanilla value 5.0
+    Param("MoveAcceleration", "20.0");                // DL: 40.0, PREPROD
     Param("MoveAccelerationInAttackRest", "20.0");
     Param("MoveSprintMinAcceleration", "4.5");
     Param("MoveSprintAcceleration", "80.0");
@@ -788,7 +788,7 @@ sub main()
 	Param("GraplePullMinAngle", "-40.0");
 	Param("GraplePullMidAngle", "-10.0");
 	Param("GraplePullMaxAngle", "60.0");
-	Param("GraplePullScaleDownFactor", "1.13");
+	Param("GraplePullScaleDownFactor", "0.25"); // vanilla value 1.13 - determines how strong grapple pulls are with each consecutive pull off the ground
 	
     Param("GrappleHookLevel", "0");
 
@@ -857,10 +857,10 @@ sub main()
 	Param("ChargeDamageStaminaMul", "2.0");
     Param("ChargeAutoReleaseTime", "-1.0"); // to restore auto release for power attack, set 1.2 here
     Param("ChargeHoldDuration", "0.35");
-    Param("ChargeWeaponDurabilityMul", "2.0");
-	Param("MeleeWpnDurabilityMulReduce", "2.0");
-    Param("MeleeWpnHeavyAttackDurabilityMul", "2.0");
-    Param("EfficientFightingDurabilityLostMul", "1.0");
+    Param("ChargeWeaponDurabilityMul", "0.0");
+	Param("MeleeWpnDurabilityMulReduce", "0.0");
+    Param("MeleeWpnHeavyAttackDurabilityMul", "0.0");
+    Param("EfficientFightingDurabilityLostMul", "0.0");
 	Param("ChargeSpinCrouchOffset", "-0.2");
 	Param("ChargeSpinAdditionalRange", "1.5");
     Param("ChargeShortPhysicsDamageMul", "1.5");
@@ -915,7 +915,7 @@ sub main()
     Param("AimCrouchDeceleration", "10.0");
 
     // Dialog
-    Param("DialogCameraDefaultFOV", "57.0");
+    Param("DialogCameraDefaultFOV", "57.0"); // vanilla value 52.0
     Param("DialogDefaultDofFarMin", "40.0");
     Param("DialogDefaultDofFarMax", "100.0");
     Param("DialogCrouchCentimeters", "0.02");
@@ -969,6 +969,7 @@ sub main()
     Param("HangMinVerticalLookHandAngleRatio", "0.5");
     // SHIMMY
     Param("ShimmyUpRange", "1.75");
+	Param("ShimmyFastAnims", "1"); // not present in vanilla - needed to enable fast climbing animations
     Param("ShimmyDownRange", "1.87");
     Param("ShimmyBackwardRange", "1.15");
     Param("ShimmyForwardRange", "1.0");
@@ -992,7 +993,7 @@ sub main()
 	
 	Param("JumpOnAttackMaxSpeed", "4.5");
 
-    Param("EnemyGrabChance", "1");
+    Param("EnemyGrabChance", "0.05");
 
     // FIREARMS
     Param("RangeMeleeMul", "1.1");
@@ -1050,7 +1051,7 @@ sub main()
 	
     // tackle prototype in PH
     Param("TackleHit", "0");
-	Param("TackleGrabEnabled", "0");
+	Param("TackleGrabEnabled", "1"); // vanilla value 0 - enables Dying Light 2 Tackle 
     Param("TackleControlEnabled", "1");
     Param("AddTackleTime", "0.0");
 
@@ -1208,10 +1209,10 @@ sub main()
 	Param("AmortizerNoiseChancePercantege", "0.0");
 	
 	Param("OportunityWeaponMaxSpeedMul", "1.0");
-	Param("CanBlockProjectiles", "true");
-	Param("CanDeflectProjectiles", "true");
-    Param("CanBlockThrowables", "true");
-    Param("CanDeflectThrowables", "true");
+	Param("CanBlockProjectiles", "true"); // vanilla value false 
+	Param("CanDeflectProjectiles", "true"); // vanilla value false
+    Param("CanBlockThrowables", "true"); // vanilla value false
+    Param("CanDeflectThrowables", "true"); // vanilla value false
 	
 	Param("StraightShockwaveDeflectionItemName", "Melee_Shockwave");
 	Param("StraightShockwaveDeflectionRadius", "10.0");
@@ -1564,7 +1565,7 @@ sub main()
     Param("CrouchAccuracyGainFactor", "1.0");
     Param("BestTargetMeleeRange", "4.0"); 
     Param("StaminaRegenerationFromDuck", "0.0");
-    Param("CameraCarFOV", "77.0");
+    Param("CameraCarFOV", "77.0"); // vanilla value 65.0
     Param("TackleHitFromStandWindow", "0.0");
     Param("HarvestingItemStackSizeMul", "1.0");
     Param("ThoroughSearch", "0.0");
@@ -1872,7 +1873,7 @@ sub main()
 	Param("DodgeBackDiveEnabled", "false");
 	Param("EnableThrowRicochet", "false");
 	
-	Param("CameraDefaultFOVReduction", "0.0");
+	Param("CameraDefaultFOVReduction", "0.0"); // vanilla value -10.0
 	Param("CameraDefaultFOVReducedSpringTime", "8.0");
 	Param("CameraDefaultFOVRemoveReductionSpringTime", "4.0");
     
@@ -1882,7 +1883,7 @@ sub main()
     
     Param("ForceLethalTakedown", "true");
 	
-	Param("AutoActiveLandings", "false");
+	Param("AutoActiveLandings", "true");
 	Param("BlockHeavyEdgeGrabs", "false");
 	Param("BlockFailedEdgeGrabs", "false");
 	
@@ -2060,7 +2061,7 @@ sub main()
 	
 	Param("RadarAdditionalFOV", "20.0");
 	
-	Param("FogOfWarViewRadius", "999999.0");
+	Param("FogOfWarViewRadius", "90.0");
 
     Param("EnablePlayerRoles", "true");
     Param("EnablePlayerRolesInSinglePlayer", "true");
@@ -2134,12 +2135,12 @@ sub main()
 
     Param("CrouchRollEnabled", "false");
 	
-    Param("WetGetingDryDuration", "5.0");
+    Param("WetGetingDryDuration", "5.0"); // vanilla value 30.0 - how long it takes crane to get dry after getting wet in rain
     Param("WetGetingWetInStormDuration", "10.0"); 
     Param("WetGetingWetInRainDuration", "15.0");
     
-	Param("SweatGetingDryDuration", "5.0"); 
-    Param("SweatGetingSweatDuration", "999.0");
+	Param("SweatGetingDryDuration", "5.0");  // vanilla value 20.0 - how long it takes for crane to get dry after getting sweaty
+    Param("SweatGetingSweatDuration", "999.0"); // vanilla value 10.0 - how long it takes the player to get sweaty 
 	
 	Param("MeleeProgressiveHitCooldownTimer", "4.0");
 	Param("EpicMomentProbability", "0.01");	
@@ -2310,7 +2311,7 @@ sub main()
     Param("WeaponThrowPowerOneHanded", "17.0");
     Param("WeaponDamageWeaponThrowMul", "0");
     Param("WeaponDamageWeaponThrowMulCoop", "0");
-    Param("ThrownMeleeWeaponDurabilityLoss", "1");
+    Param("ThrownMeleeWeaponDurabilityLoss", "0");
     Param("ThrownMeleeWeaponHitSeverity", "Heavy"); // Light, Medium, Heavy
     Param("ThrownMeleeWeaponMoveSeverity", "Heavy"); // Light, Medium, Heavy
     Param("ThrownMeleeWeaponAfterHitVelocityMul", "0.4");
@@ -2490,14 +2491,14 @@ sub main()
 	////// DLC_FT FURY
     
 	Param("FuryMaxPoints", "100");
-    Param("FuryPointsPerAIKill", "0.5");
-    Param("FuryPointsPerHitTakenFromAI", "0.75");
+    Param("FuryPointsPerAIKill", "0.25"); // vanilla value 0.5 - how much fury the player gets per kill
+    Param("FuryPointsPerHitTakenFromAI", "0.5"); // vanilla value 0.75 - how much fory the player gets per hit taken by enemies
     Param("FuryPointsPerAmountOfDamgeTaken", "0");
     Param("FuryPointsPerTimeSpentInDarkness", "0.0");
     Param("FuryPointsPerTimeSpentInChemicals", "0.0");
     Param("FuryPointsRatioWhenStopped", "0.5");
-    Param("FuryPointsPerPerfectDodge", "4.0");
-    Param("FuryPointsPerPerfectBlock", "4.0");
+    Param("FuryPointsPerPerfectDodge", "3.5"); // vanilla value 4.0 - how much fury the player gets for perfect dodging
+    Param("FuryPointsPerPerfectBlock", "3.5"); // vanilla value 4.0 - how much fury the player gets for perfect parrying
     Param("FuryPointsMulKnife", "0.45");
     Param("FuryPointsMulKnuckles", "0.55");
     Param("FuryPointsMulOneHanded", "1.0");
@@ -2510,8 +2511,8 @@ sub main()
     Param("FuryPointsMulSpecialEnemy", "0.1");
     Param("FuryAutoActivationMinEnemiesCountEnabled", "true");
     Param("FuryAutoActivationMinEnemiesCount", "1");
-    Param("FuryPartiallyChargedActivationMinPoints", "40");
-    Param("FuryPartiallyChargedActivationCost", "20");
+    Param("FuryPartiallyChargedActivationMinPoints", "20"); // vanilla value 40 - how much fury the player needs to activate partial fury 
+    Param("FuryPartiallyChargedActivationCost", "5"); // vanilla value 20 - how much fury is used by the player once activating partial fury
 
     Param("FuryPointsPerHitDoneToAI", "0.75");
     Param("FuryPointsPerAmountOfDamageDoneToAI", "0");
@@ -2539,28 +2540,28 @@ sub main()
     Param("FuryStopCooldown", "2.5");
     Param("FuryStartCooldown", "2.5");
     
-    Param("FuryActiveEffectValue", "1");
+    Param("FuryActiveEffectValue", "0");
     Param("FuryReadyEffectValue", "1");
     Param("FuryReadyEffectStart", "0.7");
     Param("FuryReadyEffectStartMinValue", "0.7");
-    Param("FuryPulseEffectValue", "1");
-    Param("FuryPulseEffectStart", "0.25");
+    Param("FuryPulseEffectValue", "0");
+    Param("FuryPulseEffectStart", "0.00");
     Param("FuryStartTransformationEffectValue", "0.5");
     Param("FuryEndTransformationEffectValue", "1.25");
-    Param("FuryExhaustedEffectValue", "1");
-    Param("FuryExhaustedEffectEnd", "0.25");
-    Param("FuryOvershootAtTheEndTime", "0.4");
-    Param("FuryReadyPPEfectTimerMax", "3.0");
+    Param("FuryExhaustedEffectValue", "0");
+    Param("FuryExhaustedEffectEnd", "0.00");
+    Param("FuryOvershootAtTheEndTime", "0.0");
+    Param("FuryReadyPPEfectTimerMax", "0.0");
     Param("FuryBeginActiveEffectTransitionTime", "1.0");
     Param("FuryEndActiveEffectTransitionTime", "1.0");
-    Param("FuryEndExhaustedEffectTime", "5.0");
+    Param("FuryEndExhaustedEffectTime", "0.0");
     Param("FuryPartiallyChargedStartEffectTransitionTime", "2.0");
     Param("FuryPartiallyChargedActiveEffectTime", "3.0");
     Param("FuryPartiallyChargedEndEffectTransitionTime", "2.0");
     Param("FuryPartiallyChargedEffectValue", "1.0");
 
-    Param("FuryPowerIncreasedEffectTime", "6.0");
-    Param("FuryPowerIncreasedEffectValue", "0.75");
+    Param("FuryPowerIncreasedEffectTime", "0.0");
+    Param("FuryPowerIncreasedEffectValue", "0.00");
 
     Param("FuryChargedSilentEffectCooldown", "60.0");
     Param("FuryChargedSilentEffectTimer", "5.0");
@@ -2571,7 +2572,7 @@ sub main()
     Param("FuryAdditionalFOV", "20");
     Param("FuryAdditionalFOVOvershoot", "20"); // added to FuryAdditionalFOV for a moment and the end of transition
     Param("FuryAdditionalFOVUndershoot", "15"); // subtracted from players default fov at the end of transition
-    Param("FuryMaxTotalFOV", "77");          // The maximum the Fov and the Fury FoV will get to
+    Param("FuryMaxTotalFOV", "87");          // The maximum the Fov and the Fury FoV will get to
     Param("FuryMaxTotalFOVOvershoot", "97"); // The maximum the Fov and the Fury + Overshoot FoV will get to
     Param("FuryBeginAdditionalFOVTransitionTime", "1.2");
     Param("FuryEndAdditionalFOVTransitionTime", "1.2");
@@ -2589,8 +2590,8 @@ sub main()
     Param("FuryGroundPoundEnableLvl2", "false");
     Param("FuryJumpEnable", "false");
     Param("FurySprintEnable", "false");
-    Param("FuryDropKickEnableLvl1", "true");
-    Param("FuryDropKickEnableLvl2", "true");
+    Param("FuryDropKickEnableLvl1", "true"); // vanilla - false. enables dropkick during fury
+    Param("FuryDropKickEnableLvl2", "true"); // vanilla - same as above
     Param("FuryWindmillEnableLvl1", "false");
     Param("FuryWindmillEnableLvl2", "false");
     Param("FuryScreamEnableLvl1", "false");
@@ -2633,7 +2634,7 @@ sub main()
     Param("FuryPassiveLandingLevel3HorzMinLookAngle", "90.0");
     Param("FuryPassiveLandingLevel4HorzMinLookAngle", "35.0");
 
-    Param("FuryDropKickRequiredSpeed", "0.0");
+    Param("FuryDropKickRequiredSpeed", "0.0"); // vanilla value 5.0 - how much momentum the player needs to dropkick (0.0 means the player can dropkick whilst standing still)
 
     Param("FuryHitThrowAutoAimMaxRange", "50.0");
     Param("FuryHitThrowAutoAimMaxAngle", "45.0");
@@ -2859,7 +2860,7 @@ sub main()
 // Skills Stamina Cost
     Param("HeadStompStaminaCost", "1.0");
     Param("WindmillStaminaCostMul", "1.75");
-    Param("PowerAttackStaminaCostMul", "0.75"); 
+    Param("PowerAttackStaminaCostMul", "0.75"); // vanilla value 1.0 - how much stamina power attacks cost relative to base attack stamina usage
     Param("PerfectDodgeStaminaCost", "0.0");
     Param("SlideStaminaCostPerSecond", "0.0");
     Param("LedgeTakedownStaminaCost", "1.5"); 

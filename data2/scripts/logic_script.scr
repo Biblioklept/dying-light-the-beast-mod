@@ -1,0 +1,738 @@
+import "burnouts_defines.mth"
+import "logic_script_game.scr"
+import "logic_script_game_overlay.scr"
+
+sub main()
+{
+	extern float TIME;
+
+	extern float f_always_reload;//For debug
+	extern vec3 v_camera_pos_ws;
+
+	extern float f_lighting_lookdev_on;
+
+	extern float f_time;
+	float time_prv = (f_time > 0.0 && f_time < TIME) ? f_time : TIME;
+	float delta_time = (f_time > 0.0 && f_time < TIME) ? TIME - time_prv : 0.0;
+	float delta_time = min(delta_time, 0.066);
+	Set("f_delta_time", delta_time);
+	Set("f_time_prv", time_prv);
+	Set("f_time", TIME);
+
+	extern float FPS;
+	float fps_inv = 1.0 / max(FPS, 0.0001);
+	
+
+	// VOXELS
+	extern float f_weather_blend;
+	float weather_blend_smooth = 3.0 * f_weather_blend * f_weather_blend - 2.0 * f_weather_blend * f_weather_blend * f_weather_blend;
+	float weather_blend_smooth = clamp(weather_blend_smooth);
+
+	Set("f_weather_blend_smooth", weather_blend_smooth);
+
+	extern float f_prev_weather_blend;
+	extern int i_voxels_weather_blend;
+
+	int new_voxels_weather_blend = ((i_voxels_weather_blend <= 0) || (i_voxels_weather_blend >= 10)) ? 0 : i_voxels_weather_blend + 1;
+    // normally we want to start blend when f_weather_blend crosses 0.99 value, but in low frame-rates and fast blends it can happen that f_weather_blend will never reach that before it's set to 0 again.
+    // we handle it here by checking if current value is 0 and last value was lower than 0.99
+	int new_voxels_weather_blend = ((f_prev_weather_blend < 0.99) && (f_weather_blend >= 0.99) || (f_prev_weather_blend > 0.0 && f_prev_weather_blend < 0.99) && (f_weather_blend == 0.0)) ? 1 : new_voxels_weather_blend; 
+    Set("i_voxels_weather_blend", new_voxels_weather_blend);
+
+	Set("f_prev_weather_blend", f_weather_blend);
+
+	extern float f_voxels_opacity_blender;
+	Set("f_voxels_opacity_blender", new_voxels_weather_blend == 0 ? (f_voxels_opacity_blender * 0.98 + weather_blend_smooth * 0.02) : f_voxels_opacity_blender);
+
+
+	// WIND ////////////////
+
+	extern float f_wind_power;
+	extern float f_wind_enabled;
+	extern float f_wind_omni_power;
+	extern float f_pp_wind_offset;
+	extern float f_pp_omni_offset;
+	extern float f_pp_wind_noise;
+	extern float f_wind_time_factor;
+	extern float f_wind_omni_time_factor;
+	extern float f_pp_wind_power_current;
+	extern float f_pp_wind_power_current_phase;
+	extern float f_wind_phase_offset;
+	extern float f_pp_wind_update_current;
+	extern int i_pp_wind_update_status;
+	extern float f_wind_update_interval;
+	extern float f_game_time;
+	extern float f_pp_game_time;
+	extern float f_wind_wetness_factor;
+	extern float f_weather_wet;
+
+	Set("f_pp_wind_power_current_prv", f_pp_wind_power_current);
+	Set("f_pp_wind_power_current_phase_prv", f_pp_wind_power_current_phase);
+	Set("f_pp_wind_offset_prv", f_pp_wind_offset );
+	Set("f_pp_omni_offset_prv", f_pp_omni_offset );
+	Set("f_pp_wind_noise_prv", f_pp_wind_noise );
+	Set("f_pp_game_time_prv", f_pp_game_time );
+
+	Set("f_pp_game_time", f_game_time);
+
+	float new_update_time = f_pp_wind_update_current + delta_time;
+
+	int new_update_status = (new_update_time > f_wind_update_interval) ? 1 : 0;
+	Set("i_pp_wind_update_status", new_update_status);
+	new_update_time = (new_update_time > f_wind_update_interval) ? f_wind_update_interval - new_update_time : new_update_time;
+
+	Set("f_pp_wind_update_current", new_update_time);
+
+	extern float f_frame_offset;
+	float frame_offset = f_frame_offset + fps_inv;
+	Set("f_frame_offset_prv", f_frame_offset);
+	Set("f_frame_offset", frame_offset);
+
+	float wind_power = (f_wind_enabled > 0.0) ? f_wind_power : 0.0;
+	Set("f_pp_wind_power", wind_power);	
+	float wind_noise_range = clamp(wind_power * 2.0);
+	// float wind_noise_range = 1.0;
+
+	float wind_noise_min = clamp((wind_power - 1.0) * (wind_noise_range + 1.0) + 1.0);
+	float wind_noise_max = clamp(wind_power * (wind_noise_range + 1.0));
+	
+	float wntm = 0.5;
+	
+	float wind_noise = sin(f_pp_wind_offset * 1.567 * wntm);
+	float wind_noise = wind_noise + sin(f_pp_wind_offset * 1.925 * wntm);
+	float wind_noise = wind_noise + sin(f_pp_wind_offset * 1.131 * wntm);
+	float wind_noise = wind_noise + sin(f_pp_wind_offset * 0.563 * wntm);
+	float wind_noise = clamp(wind_noise * 0.075 + 0.5);
+	
+	float wind_power_current = wind_noise * (wind_noise_max - wind_noise_min) + wind_noise_min;
+	float wind_max_power = 4.0;
+	//float wind_power_current = pow(wind_power_current, 0.5);
+	
+	
+	Set("f_pp_wind_power_current", wind_power_current);
+	Set("f_pp_wind_noise", wind_noise);
+	
+	float wind_wetness_factor = 1.0 - f_weather_wet * f_wind_wetness_factor;
+
+	float wind_offset = f_pp_wind_power_current * delta_time;
+	float wind_offset = wind_offset * f_wind_time_factor;
+	float wind_offset =  wind_offset * wind_max_power;
+	float wind_offset = wind_offset * wind_wetness_factor;
+
+	float wind_offset = wind_offset + f_pp_wind_offset;// ADD OLD OFFSET
+	
+	Set("f_pp_wind_offset", wind_offset);
+
+	float omni_power_current = f_wind_omni_power * wind_noise;
+	Set("f_pp_omni_offset", omni_power_current * fps_inv * f_wind_omni_time_factor + f_pp_omni_offset );
+	
+	float wind_direct_power = wind_power_current * wind_power_current;
+	float wind_noise_power = pow(wind_power_current,0.5);
+	Set("f_pp_wind_direct_power", wind_direct_power);
+	Set("f_pp_wind_noise_power", wind_noise_power);
+	
+	float wind_offset_phase = f_pp_wind_offset - f_wind_phase_offset;
+	float wind_noise_phase = (sin(wind_offset_phase * 1.567 * wntm) + sin(wind_offset_phase * 1.925 * wntm) + sin(wind_offset_phase * 1.131 * wntm) + sin(wind_offset_phase * 0.563 * wntm)) * 0.14 + 0.5;
+	float wind_power_current_phase = wind_noise_phase * (wind_noise_max - wind_noise_min) + wind_noise_min;
+	Set("f_pp_wind_power_current_phase", wind_power_current_phase);
+	
+	//Wind Dir
+	extern vec3 v_wind_dir;
+	Set("v_pp_wind_dir", v_wind_dir);
+	float f_wind_dir_length_inv = 1.0 / pow(v_wind_dir.x * v_wind_dir.x + v_wind_dir.z * v_wind_dir.z, 0.5);
+	Set("v_pp_wind_2d_xform", [v_wind_dir.x * f_wind_dir_length_inv, v_wind_dir.z * f_wind_dir_length_inv, -v_wind_dir.z * f_wind_dir_length_inv, 0.0]);	
+
+
+	// cone clouds
+	extern float f_clouds_speed_layer_a;
+	extern float f_clouds_speed_layer_b;
+	extern float f_clouds_speed_layer_c;
+	
+	extern float f_pp_cloud_wind_power_accum_a;
+	float cloud_wind_power_curr_a = f_pp_cloud_wind_power_accum_a + f_clouds_speed_layer_a * delta_time;
+	extern float f_pp_cloud_wind_power_accum_b;
+	float cloud_wind_power_curr_b = f_pp_cloud_wind_power_accum_b + f_clouds_speed_layer_b * delta_time;
+	extern float f_pp_cloud_wind_power_accum_c;
+	float cloud_wind_power_curr_c = f_pp_cloud_wind_power_accum_c + f_clouds_speed_layer_c * delta_time;
+
+	Set("f_pp_cloud_wind_power_accum_a", cloud_wind_power_curr_a);
+	Set("f_pp_cloud_wind_power_accum_b", cloud_wind_power_curr_b);
+	Set("f_pp_cloud_wind_power_accum_c", cloud_wind_power_curr_c);
+
+	// cone clouds low
+	extern float f_low_clouds_speed_layer_a;
+	extern float f_low_clouds_speed_layer_b;
+	extern float f_low_clouds_speed_layer_c;
+	
+	extern float f_pp_low_cloud_wind_power_accum_a;
+	float low_cloud_wind_power_curr_a = f_pp_low_cloud_wind_power_accum_a + f_low_clouds_speed_layer_a * delta_time;
+	extern float f_pp_low_cloud_wind_power_accum_b;
+	float low_cloud_wind_power_curr_b = f_pp_low_cloud_wind_power_accum_b + f_low_clouds_speed_layer_b * delta_time;
+	extern float f_pp_low_cloud_wind_power_accum_c;
+	float low_cloud_wind_power_curr_c = f_pp_low_cloud_wind_power_accum_c + f_low_clouds_speed_layer_c * delta_time;
+
+	Set("f_pp_low_cloud_wind_power_accum_a", low_cloud_wind_power_curr_a);
+	Set("f_pp_low_cloud_wind_power_accum_b", low_cloud_wind_power_curr_b);
+	Set("f_pp_low_cloud_wind_power_accum_c", low_cloud_wind_power_curr_c);
+
+	// lightnings  https://www.desmos.com/calculator/1q1bupvt6h
+	extern float f_lightning_on;
+	extern float f_lightning_dbg_on;
+	float lightning_on_inv = 1.0 - f_lightning_on;
+	float lightning_mask = clamp(clamp(sin(TIME * 3.14)) * clamp(sin(TIME * 1.19)) * 2.0 - 0.8);
+	float lightning_mask = lightning_mask - (lightning_on_inv * 1.2);
+	float lightning_mask = clamp(pow(lightning_mask, 0.25)) * clamp(2.0 - lightning_on_inv * 2.0);
+	float lightning_mask = f_lightning_dbg_on > 0.0 ? 1.0 : lightning_mask;
+	Set("f_pp_lightning", lightning_mask * pow(f_lightning_on, 32.0));
+
+	// lighttning positioning
+	extern float f_pp_lightning_pow;
+	extern vec3 v_pp_lightning_dir;
+	extern vec3 v_camera_dir_ws;
+
+	float lightning_pow = 1.0 + wrap(TIME * 2.137, 0.0, 1.0) * 7.0;
+	float lightning_pow = lightning_mask == 0.0 ? lightning_pow : f_pp_lightning_pow;
+
+	float lightning_dir_offset_factor = 0.1 + 0.75 * length([v_camera_dir_ws.x, v_camera_dir_ws.z]);
+	vec3 lightning_dir = normalize([-v_camera_dir_ws.x + sin(TIME * 11.11) * lightning_dir_offset_factor, 0.0, -v_camera_dir_ws.z + cos(TIME * 4.44) * lightning_dir_offset_factor]);
+	vec3 lightning_dir = lightning_mask == 0.0 ? lightning_dir : v_pp_lightning_dir;
+
+	Set("f_pp_lightning_pow", lightning_pow);
+	Set("v_pp_lightning_dir", lightning_dir);
+
+
+	// Rain Dir
+	extern float f_wind_power;
+	float rain_dir_wind = 0.5 + f_wind_power * 2.0;
+	vec3 rain_dir = [v_wind_dir.x * rain_dir_wind, -f_PI, v_wind_dir.z * rain_dir_wind];
+	float rain_dir_length = pow(rain_dir.x * rain_dir.x + rain_dir.y * rain_dir.y + rain_dir.z * rain_dir.z, 0.5);
+    vec3 rain_dir_n = rain_dir / rain_dir_length;
+	Set("v_pp_rain_direction", rain_dir_n);
+	
+	// Snow
+	Set("v_pp_snow_direction", rain_dir_n);// Snow direction is same as rain direction.
+
+	// Wet surface
+	extern float f_weather_wet_time;
+	extern float f_weather_dry_time;
+    float f_max_wet_time = f_weather_wet_time;
+    float f_max_dry_time = f_weather_dry_time * 60.0;
+	extern float f_rain;
+
+	float wet_delta_wet = (f_max_wet_time > 0.0) ? (delta_time * f_rain) / f_max_wet_time : 0.0;
+	float wet_delta_dry = (f_max_dry_time > 0.0) ? delta_time / f_max_dry_time : 0.0;
+	
+	float wet_delta = (f_rain > 0.0) ? wet_delta_wet : -wet_delta_dry;
+	extern float f_weather_wet_force;
+	extern float f_weather_wet_force_value;
+
+	float f_weather_wet_forced = (f_weather_wet_force > 0.0) ? f_weather_wet_force_value : clamp(f_weather_wet + wet_delta);
+	float f_weather_wet_forced = f_lighting_lookdev_on > 0.0 ? 0.0 : f_weather_wet_forced;
+
+	Set("f_weather_wet", f_weather_wet_forced);
+
+	// Rainbow
+
+	extern float f_rainbow_enable;
+	extern float f_rainbow;
+	float rainbow_on = (1 - f_rain) * f_weather_wet * f_rainbow * f_rainbow_enable; // f_rainbow_enable to be removed once rainbow gets approved
+	Set("f_pp_rainbow_on", rainbow_on);
+
+	//snowflakes
+	extern float f_pp_snow_offset_v;
+	extern float f_pp_snow_offset_h;
+	
+	extern vec3 v_pp_snow_dir;
+	extern vec3 v_pp_snow_dir_prv;
+	Set("v_pp_snow_dir_prv", v_pp_snow_dir);
+
+	extern float f_snowflakes_vertical_speed;
+	extern float f_snowflakes_horizontal_speed;
+	
+	float snow_offset_v = f_snowflakes_vertical_speed * delta_time;
+	float snow_offset_v = snow_offset_v * f_wind_time_factor * 2.0;
+	Set("f_pp_snow_offset_v", f_pp_snow_offset_v + snow_offset_v);
+
+	float snow_offset_h = f_snowflakes_horizontal_speed * delta_time * f_pp_wind_power_current;
+	float snow_offset_h = snow_offset_h * f_wind_time_factor * 10.0;
+	Set("f_pp_snow_offset_h", f_pp_snow_offset_h + snow_offset_h );
+
+	Set("v_pp_snow_dir", [v_wind_dir.x * snow_offset_h + v_pp_snow_dir.x  , - snow_offset_v + v_pp_snow_dir.y, v_wind_dir.z * snow_offset_h + v_pp_snow_dir.z]);
+	
+
+
+
+
+	// Rain Time (f_rain scaled)
+	extern float f_rain;
+	extern float f_pp_rain_time;
+	Set("f_pp_rain_time", f_pp_rain_time + delta_time * f_rain);
+
+	// Rain Mist
+	extern float f_rain;
+	extern float f_storm;
+	extern float f_rain_mist_intensity;
+	Set("f_pp_rain_mist", max(f_rain, f_storm) * f_rain_mist_intensity);
+
+	// Rain Drops
+	float rain_drops = f_rain * 0.5 + f_storm * f_rain * 0.5;
+	Set("f_pp_rain_drops", rain_drops);
+
+
+	// Windshield Wiper
+	extern float f_windshield_wiper_pos;
+	extern float f_pp_windshield_wiper_pos;
+	Set("f_pp_windshield_wiper_pos_prv", f_pp_windshield_wiper_pos);
+	Set("f_pp_windshield_wiper_pos", f_windshield_wiper_pos);
+	//Set("f_pp_windshield_wiper_pos", abs(wrap(TIME * 0.8, 0.0, 1.0) - 0.5) * 2.0);
+
+	// Windshield Splats
+	extern int i_windshield_splat_hit_blood;
+	extern int i_pp_windshield_splat_hit_blood_prv;
+	int windshield_splat_hit_blood_on = (i_windshield_splat_hit_blood == i_pp_windshield_splat_hit_blood_prv) ? 0 : 1;
+	Set("i_pp_windshield_splat_hit_blood_on", windshield_splat_hit_blood_on);
+	Set("i_pp_windshield_splat_hit_blood_prv", i_windshield_splat_hit_blood);
+	
+	extern int i_windshield_splat_hit_mud;
+	extern int i_pp_windshield_splat_hit_mud_prv;
+	int windshield_splat_hit_mud_on = (i_windshield_splat_hit_mud == i_pp_windshield_splat_hit_mud_prv) ? 0 : 1;
+	Set("i_pp_windshield_splat_hit_mud_on", windshield_splat_hit_mud_on);
+	Set("i_pp_windshield_splat_hit_mud_prv", i_windshield_splat_hit_mud);
+
+	extern int i_windshield_splat_hit_water;
+	extern int i_pp_windshield_splat_hit_water_prv;
+	int windshield_splat_hit_water_on = (i_windshield_splat_hit_water == i_pp_windshield_splat_hit_water_prv) ? 0 : 1;
+	Set("i_pp_windshield_splat_hit_water_on", windshield_splat_hit_water_on);
+	Set("i_pp_windshield_splat_hit_water_prv", i_windshield_splat_hit_water);
+
+	// Windshield Clear
+	extern int i_windshield_clear;
+	extern int i_pp_windshield_clear_prv;
+	int windshield_clear_on = (i_windshield_clear == i_pp_windshield_clear_prv) ? 0 : 1;
+	Set("i_pp_windshield_clear_on", windshield_clear_on);
+	Set("i_pp_windshield_clear_prv", i_windshield_clear);
+
+	// Windshield - frametime-independent fade
+	extern float f_pp_windshield_fade_accum;
+	extern int i_pp_windshield_fade_odd;
+	float windshield_fade_accum = f_pp_windshield_fade_accum + delta_time;
+	float windshield_fade_accum_rest = wrap(windshield_fade_accum, 0.0, 0.04);
+	float windshield_fade_on = (windshield_fade_accum - windshield_fade_accum_rest) * 25.0;
+	int windshield_fade_odd = i_pp_windshield_fade_odd + (windshield_fade_on > 0 ? 1 : 0);
+	Set("i_pp_windshield_fade_odd", windshield_fade_odd == 2 ? 0 : windshield_fade_odd);
+	Set("f_pp_windshield_fade_on", windshield_fade_on);
+	Set("f_pp_windshield_fade_accum", windshield_fade_accum_rest);
+
+	// Windshield on/off
+	// on trigger, keep it on for few seconds and then fade out
+	extern float f_pp_windshield_on_timer;
+	float windshield_on_timer = clamp(f_pp_windshield_on_timer - delta_time * 0.05);
+	float windshield_on_timer = rain_drops > 0.0 ? 1.0 : windshield_on_timer;
+	float windshield_on_timer = windshield_splat_hit_blood_on > 0 ? 1.0 : windshield_on_timer;
+	float windshield_on_timer = windshield_splat_hit_mud_on > 0 ? 1.0 : windshield_on_timer;
+	float windshield_on_timer = windshield_splat_hit_water_on > 0 ? 1.0 : windshield_on_timer;
+	Set("f_pp_windshield_on_timer", windshield_on_timer);
+
+	extern float f_windshield;
+	extern float f_pp_windshield;
+	float windshield = windshield_on_timer > 0.0 ? 1.0 : clamp(f_pp_windshield - delta_time);
+	float windshield = min(windshield, f_windshield);
+	Set("f_pp_windshield", windshield);
+
+
+	// Groundmarks Clear
+	extern int i_groundmarks_clear;
+	extern int i_pp_groundmarks_clear_prv;
+	int groundmarks_clear_on = (i_groundmarks_clear == i_pp_groundmarks_clear_prv) ? 0 : 1;
+	Set("i_pp_groundmarks_clear_on", groundmarks_clear_on);
+	Set("i_pp_groundmarks_clear_prv", i_groundmarks_clear);
+
+	// Groundmarks - frametime-independent fade
+	extern float f_groundmarks_lifetime;
+	extern float f_pp_groundmarks_fade_accum;
+	float groundmarks_fade_accum = f_pp_groundmarks_fade_accum + delta_time;
+	float groundmarks_fade_accum_rest = wrap(groundmarks_fade_accum, 0.0, (f_groundmarks_lifetime / 255.0));
+	float groundmarks_fade_on = (groundmarks_fade_accum - groundmarks_fade_accum_rest) * (1.0 / (f_groundmarks_lifetime / 255.0));
+	Set("f_pp_groundmarks_fade_on", groundmarks_fade_on);
+	Set("f_pp_groundmarks_fade_accum", groundmarks_fade_accum_rest);
+
+
+	// Burnouts - on/off according to camera distance from last brush activity
+	extern float f_pp_burnouts_on;
+	extern vec3 v_pp_burnouts_last_activity_pos;
+	extern vec4 v_burnouts_paint_brush_0;
+	extern vec4 v_burnouts_paint_brush_1;
+	extern vec4 v_burnouts_paint_brush_2;
+	extern vec4 v_burnouts_paint_brush_3;
+	extern float f_burnouts_paint_dbg;
+
+	float burnouts_brush_on = v_burnouts_paint_brush_0.w + v_burnouts_paint_brush_1.w + v_burnouts_paint_brush_2.w + v_burnouts_paint_brush_3.w + f_burnouts_paint_dbg;
+	vec3 burnouts_last_activity_pos = burnouts_brush_on > 0.0 ? v_camera_pos_ws : v_pp_burnouts_last_activity_pos;
+	float burnouts_camera_distance = length(v_camera_pos_ws - burnouts_last_activity_pos);
+	float burnouts_on = burnouts_camera_distance > BURNOUTS_ACTIVITY_RADIUS ? 0.0 : f_pp_burnouts_on;
+	float burnouts_on = burnouts_brush_on > 0.0 ? 1.0 : burnouts_on;
+
+	Set("f_pp_burnouts_on", burnouts_on);
+	Set("v_pp_burnouts_last_activity_pos", burnouts_last_activity_pos);
+
+	
+	// Water overlay - frametime-independent fade
+	extern float f_water_ovr_lifetime;
+	extern float f_pp_water_ovr_fade_accum;
+	float water_ovr_fade_accum = f_pp_water_ovr_fade_accum + delta_time;
+	float water_ovr_fade_accum_rest = f_water_ovr_lifetime > 0.0 ? wrap(water_ovr_fade_accum, 0.0, (f_water_ovr_lifetime / 255.0)) : 0.0;
+	float water_ovr_fade_on = f_water_ovr_lifetime > 0.0 ? ((water_ovr_fade_accum - water_ovr_fade_accum_rest) * (1.0 / (f_water_ovr_lifetime / 255.0))) : 0.0;
+	Set("f_pp_water_ovr_fade_on", water_ovr_fade_on);
+	Set("f_pp_water_ovr_fade_accum", water_ovr_fade_accum_rest);
+
+
+	// map ppfx time
+	extern float f_pp_m3d_map_time;
+	Set("f_pp_m3d_map_time", f_pp_m3d_map_time + max(0.01, 1.0 / max(15.0, FPS))); //  it will update even if TIME is paused
+
+	// Snow
+	extern float f_snow_cover;
+	extern float f_snow_cover_time;
+	extern float f_snow_cover_additional;
+	extern float f_snow_cover_additional_max;
+	extern float f_snow_strength;
+
+	// Accumulate snow cover
+	float weight_snow_sign = f_snow_strength > 0.0 ? 1.0 : -1.0;
+	float snow_cover_time = (delta_time / f_snow_cover_time) * weight_snow_sign;
+	float snow_cover_add = f_snow_cover_additional + snow_cover_time;
+
+	// Additional cover shouldn't make snow_cover go over 1.0 nor f_snow_cover_max
+	float snow_cover_add = max(0.0, min(f_snow_cover_additional_max, min(1.0 - f_snow_cover, snow_cover_add)));
+
+	Set("f_snow_cover_additional", snow_cover_add);
+	Set("f_snow_cover_current", f_snow_cover + snow_cover_add);
+
+	extern float f_gen_probes_env_direct_on;
+	extern float f_gen_probes_env_bounce_on;
+	float gen_probes_env_on = max(f_gen_probes_env_direct_on, f_gen_probes_env_bounce_on);
+
+	extern float f_gen_probes_reflections_1st_on;
+	extern float f_gen_probes_reflections_2nd_on;
+	float gen_probes_reflections_on = max(f_gen_probes_reflections_1st_on, f_gen_probes_reflections_2nd_on);
+
+	float gen_probes_on = max(gen_probes_env_on, gen_probes_reflections_on);
+
+	//Weather Condtions changed checks
+	extern float f_skybox_intensity;
+	extern float f_skybox_intensity_prv;
+	float sky_intensity_changed = (f_skybox_intensity_prv != f_skybox_intensity) ? 1.0 : 0.0;
+
+	extern float f_shading_sun_power;
+	extern float f_shading_sun_power_prv;
+	float shading_sun_power_changed = (f_shading_sun_power != f_shading_sun_power_prv) ? 1.0 : 0.0;
+	
+	extern vec3 v_shading_sun_color;
+	extern vec3 v_shading_sun_color_prv;
+	float shading_sun_color_changed = ((v_shading_sun_color.x != v_shading_sun_color_prv.x) || (v_shading_sun_color.y != v_shading_sun_color_prv.y) || (v_shading_sun_color.z != v_shading_sun_color_prv.z)) ? 1.0 : 0.0;
+	
+	extern float f_skybox_sun_pos_u;
+	extern float f_skybox_sun_pos_u_prv;
+	extern float f_sun_pos_radial_u;
+	extern float f_sun_pos_radial_u_prv;
+	float sun_pos_u_changed = (f_skybox_sun_pos_u != f_skybox_sun_pos_u_prv) ? 1.0 : 0.0;
+	float sun_pos_u_changed = (f_sun_pos_radial_u != f_sun_pos_radial_u_prv) ? 1.0 : sun_pos_u_changed;
+
+	extern float f_skybox_sun_pos_v;
+	extern float f_skybox_sun_pos_v_prv;	
+	extern float f_sun_pos_radial_v_real;
+	extern float f_sun_pos_radial_v_real_prv;
+	float sun_pos_v_changed = (f_skybox_sun_pos_v != f_skybox_sun_pos_v_prv) ? 1.0 : 0.0;
+	float sun_pos_v_changed = (f_sun_pos_radial_v_real != f_sun_pos_radial_v_real_prv) ? 1.0 : sun_pos_v_changed;
+
+	extern float f_skybox_moon_pos_u;
+	extern float f_skybox_moon_pos_u_prv;	
+	float moon_pos_u_changed = (f_skybox_moon_pos_u != f_skybox_moon_pos_u_prv) ? 1.0 : 0.0;
+
+	extern float f_skybox_moon_pos_v;
+	extern float f_skybox_moon_pos_v_prv;	
+	float moon_pos_v_changed = (f_skybox_moon_pos_v != f_skybox_moon_pos_v_prv) ? 1.0 : 0.0;
+
+	extern float f_skybox_night;
+	extern float f_skybox_night_prv;	
+	float skybox_night_changed = (f_skybox_night != f_skybox_night_prv) ? 1.0 : 0.0;
+
+	float weather_changed = max(f_weather_blend, skybox_night_changed);
+	float weather_changed = max(weather_changed, moon_pos_u_changed);
+	float weather_changed = max(weather_changed, moon_pos_v_changed);
+	float weather_changed = max(weather_changed, sky_intensity_changed);
+	float weather_changed = max(weather_changed, shading_sun_power_changed);
+	float weather_changed = max(weather_changed, shading_sun_color_changed);
+	float weather_changed = max(weather_changed, sun_pos_u_changed);
+	float weather_changed = max(weather_changed, sun_pos_v_changed);
+
+	//Indoor outdoor changed 
+	extern int i_indoor_on;
+	extern int i_indoor_on_prv;
+	bool indoor_outdoor_changed = (i_indoor_on != i_indoor_on_prv);//Check whether we've just entered outdoor/ exited outdoor if yes we need to rapidly regenerate resources
+
+	//Oems Reload
+	extern float f_oems_generated;
+
+	extern float f_m3d_on;
+	extern float f_m3d_on_prv;
+	extern int i_menu_lighting_on;
+	extern int i_menu_lighting_on_prv;
+	bool menus_changed = (f_m3d_on != f_m3d_on_prv) || (i_menu_lighting_on != i_menu_lighting_on_prv);//Reloads oem if we exit/enter m3d/ menu scene
+
+	float reload_oems = ( (weather_changed > 0.0) || (f_oems_generated == 0.0) || indoor_outdoor_changed || (f_always_reload > 0.0) || menus_changed || (gen_probes_on > 0.0) ) ? 1.0 : 0.0;//If there is weather update or oem has not been generated yet reload
+	Set("f_reload_oems", reload_oems);//Allow & deny the oem reload
+	
+	//Reflection outdoor reloads
+	bool reload_rfl_outdoor = indoor_outdoor_changed || (weather_changed > 0.0) || (f_always_reload > 0.0);//If oem is updated / there is indoor outdoor change update rfl near & far
+	//reflection outdoor near
+	extern vec3 v_rfl_outdoor_near_last_cam_pos;
+	extern float f_rfl_outdoor_near_update_dist_treshold;
+	extern float f_rfl_outdoor_near_generated;
+
+	vec3 last_reload_2_current = v_rfl_outdoor_near_last_cam_pos - v_camera_pos_ws;// last update pos to current camera pos vector
+	float last_reload_near_distance = pow(last_reload_2_current.x * last_reload_2_current.x + last_reload_2_current.y * last_reload_2_current.y + last_reload_2_current.z * last_reload_2_current.z, 0.5);
+	bool rfl_outdoor_near_reload_dist = last_reload_near_distance > f_rfl_outdoor_near_update_dist_treshold;//Update only on player movement near reflection
+	bool b_reload_rfl_outdoor_near = reload_rfl_outdoor || (f_rfl_outdoor_near_generated == 0.0) || rfl_outdoor_near_reload_dist;
+	float reload_rfl_outdoor_near = b_reload_rfl_outdoor_near ? 1.0 : 0.0;
+	
+	extern float f_hmip_generated;
+	float reload_hmip = ((f_always_reload > 0.0) || (f_hmip_generated == 0.0) || indoor_outdoor_changed  || rfl_outdoor_near_reload_dist || (weather_changed > 0.0) || (gen_probes_on > 0.0)) ? 1.0 : 0.0;
+
+	//Actual Reload variables must be below prvs to work
+	Set("f_reload_rfl_outdoor_near", 1.0);// reload_rfl_outdoor_near);//Allow & deny the rfl faroutdoor near reload
+	Set("f_hmip_reload", reload_hmip);//Allow & deny the hmip far reload
+	
+
+	//Sets need to be below actual operations to work
+	Set("f_skybox_intensity_prv", f_skybox_intensity);
+	Set("f_shading_sun_power_prv", f_shading_sun_power);
+	Set("v_shading_sun_color_prv", v_shading_sun_color);
+	Set("f_skybox_sun_pos_u_prv", f_skybox_sun_pos_u);
+	Set("f_skybox_sun_pos_v_prv", f_skybox_sun_pos_v);
+	Set("f_sun_pos_radial_u_prv", f_sun_pos_radial_u);
+	Set("f_sun_pos_radial_v_real_prv", f_sun_pos_radial_v_real);
+	Set("f_skybox_night_prv", f_skybox_night);
+	Set("f_skybox_moon_pos_u_prv", f_skybox_moon_pos_u);
+	Set("f_skybox_moon_pos_v_prv", f_skybox_moon_pos_v);
+	Set("i_indoor_on_prv", i_indoor_on);
+	Set("i_menu_lighting_on_prv", i_menu_lighting_on);
+	Set("f_m3d_on_prv", f_m3d_on);
+
+
+	Set("v_rfl_outdoor_near_last_cam_pos", rfl_outdoor_near_reload_dist ? v_camera_pos_ws : v_rfl_outdoor_near_last_cam_pos);//This remembers last rfl outdoor near update cam pos
+	Set("f_rfl_outdoor_near_generated", f_rfl_outdoor_near_generated);// This is needed to ensure there was at least one reload
+	Set("f_oems_generated", max(reload_oems, f_oems_generated));// This is needed to ensure there was at least one reload
+	Set("f_hmip_generated", max(f_hmip_generated, reload_hmip));// This is needed to ensure there was at least one reload
+
+
+
+	extern string s_heightmaps_variant_name;
+	extern string s_heightmaps_variant_name_prv;
+	Set("s_heightmaps_variant_name_prv", s_heightmaps_variant_name);
+
+	extern int i_frame_idx;
+	Set("i_frame_idx", i_frame_idx + 1);
+
+	extern int i_low_discrepancy_noise_looped_frame_id;
+	Set("i_low_discrepancy_noise_looped_frame_id", (i_low_discrepancy_noise_looped_frame_id >= 256) ? 0 : i_low_discrepancy_noise_looped_frame_id + 1);
+
+	// Underwater Post FX
+	extern float f_underwater; // it activates +/- 1m above water surfce
+	extern float f_underwater_postfx_on;
+	extern float f_underwater_postfx_lifetime;
+	extern float f_pp_underwater_postfx_on;
+	
+	float underwater_postfx_on = f_underwater > 0.0 ? 1.0 : clamp(f_pp_underwater_postfx_on - (delta_time / f_underwater_postfx_lifetime));
+	float underwater_postfx_on = delta_time > 0.0 ? underwater_postfx_on : 0.0;
+	float underwater_postfx_on = underwater_postfx_on * f_underwater_postfx_on;
+	Set("f_pp_underwater_postfx_on_prv", f_pp_underwater_postfx_on);
+	Set("f_pp_underwater_postfx_on", underwater_postfx_on);
+
+	// Screen Drops
+	extern float f_screen_drops_clear;
+	extern float f_pp_screen_drops_clear_prv;
+	float screen_drops_clear_on = (f_screen_drops_clear != f_pp_screen_drops_clear_prv) ? 1.0 : 0.0;
+	Set("f_pp_screen_drops_clear_on", screen_drops_clear_on);
+	Set("f_pp_screen_drops_clear_prv", f_screen_drops_clear);
+	
+	extern float f_free_camera_on;
+	extern float f_editor_normal_on;
+	extern int i_menu_lighting_on;
+	float screen_drops_system_off = max(0.0, f_free_camera_on - f_editor_normal_on);
+	float screen_drops_system_off = i_menu_lighting_on > 0 ? 1.0 : screen_drops_system_off;//TURN OF SCREEN DROPS WHILE IN MENUS
+	
+	extern float f_screen_drops_on;	
+	float screen_drops_system_on = f_screen_drops_on - screen_drops_system_off;
+	float screen_drops_system_on = max(0.0, screen_drops_system_on);
+	float screen_drops_system_on = f_lighting_lookdev_on > 0.0 ? 0.0 : screen_drops_system_on;
+	Set("f_pp_screen_drops_system_on", screen_drops_system_on);
+	
+	
+	//Water Timer
+	extern vec3 v_pp_rain_direction;
+	extern float f_screen_drops_water_timer_prv;
+	extern float f_screen_drops_water_max_life_time;
+	extern float f_screen_drops_water;
+	extern float f_rain;
+	extern float f_storm;
+    extern vec3 v_camera_dir_ws;
+	
+	//RAIN - Screen Drops
+	float cam_dot_rain = (v_camera_dir_ws.y * -v_pp_rain_direction.y + v_camera_dir_ws.z * -v_pp_rain_direction.z + v_camera_dir_ws.x * -v_pp_rain_direction.x);
+	float cam_dot_rain = clamp(cam_dot_rain * 0.5 + 0.5);
+	float cam_dot_rain = pow(cam_dot_rain, 2.0);
+	float spawn_rain_drops = f_rain * 0.5 + f_rain * f_storm * 0.5;
+	float spawn_rain_drops = sqrt(spawn_rain_drops) * cam_dot_rain * 0.05;
+	Set("f_screen_drops_spwn_rain", spawn_rain_drops);
+	
+	//Underwater - Screen Drops
+	extern float f_underwater_surface_level;
+	float dist_2_water_surf = v_camera_pos_ws.y - f_underwater_surface_level;
+	float spwn_wtr_drops = clamp(dist_2_water_surf);//return less than one if player is underwater
+	float spwn_wtr_drops = 1.0 - spwn_wtr_drops;
+	float spwn_wtr_drops = spwn_wtr_drops * spwn_wtr_drops;
+	float spwn_wtr_drops = spwn_wtr_drops * 0.001;
+	float spwn_wtr_drops = f_underwater > 0.0 ? spwn_wtr_drops : 0.0;
+	Set("f_screen_drops_spwn_water", spwn_wtr_drops);
+	
+
+	float new_drops_wtr = max(f_screen_drops_water, spawn_rain_drops);//NEW PARTICLES IMPULSE
+	float new_drops_wtr = max(new_drops_wtr, spwn_wtr_drops);
+	float new_drops_wtr = max(new_drops_wtr, underwater_postfx_on);
+	float drops_wtr_timer_prv = new_drops_wtr > 0.0 ? f_screen_drops_water_max_life_time : f_screen_drops_water_timer_prv;//IF NEW wtr PARTICLES ARE SPAWNED, MAX OUT THE TIMER
+	float drops_wtr_timer_prv = drops_wtr_timer_prv - delta_time;//LIFE TIME DECREASE IN TIME
+	float drops_wtr_timer_prv = max(drops_wtr_timer_prv, 0.0);
+	Set("f_screen_drops_water_timer_prv", drops_wtr_timer_prv);
+	
+	//TURN ON/TURN OFF DROPS RENDERING BASED ON MAX LIFETIME OF PARTICLES
+	float wtr_drops_alive = drops_wtr_timer_prv > 0.0 ? 1.0 : 0.0;//water drops alive
+	Set("f_pp_screen_drops_on", wtr_drops_alive * screen_drops_system_on);
+
+
+	// Ray tracing
+	extern int i_dxrt_lit_on_prv;
+	extern bool RT_LIT_ON;
+	Set("i_dxrt_lit_on_changed", ((RT_LIT_ON ? 1 : 0) != i_dxrt_lit_on_prv) ? 1 : 0);
+	Set("i_dxrt_lit_on_prv", RT_LIT_ON ? 1 : 0);
+
+	extern vec3 main_view_camera_pos_prv;
+	extern float f_pp_flashlight_pp_particles_camera;
+	vec3 cameraPosDiff = v_camera_pos_ws - main_view_camera_pos_prv;
+	vec3 cameraPosDiff2 = cameraPosDiff * cameraPosDiff;
+	float cameraPosDiffLength = pow(cameraPosDiff2.x + cameraPosDiff2.y + cameraPosDiff2.z, 0.5);
+	float cameraPosDiffOpcFactor = 1.0/(1.0 + cameraPosDiffLength * 1.0);
+	float flashlight_pp_particles_camera = clamp(f_pp_flashlight_pp_particles_camera + 0.5 * delta_time) * cameraPosDiffOpcFactor;
+	Set("f_pp_flashlight_pp_particles_camera", flashlight_pp_particles_camera);
+
+
+	// flashlight movement animation
+	extern float f_flashlight_pp_sway;
+	extern float f_pp_flashlight_pp_offset_move_x;
+	extern float f_pp_flashlight_pp_offset_move_y;
+	extern float f_pp_flashlight_pp_offset_sway;
+	extern vec3 v_camera_dir_ws;
+	extern vec3 v_camera_dir_ws_prv;
+	extern vec3 v_camera_pos_ws;
+	extern vec3 main_view_camera_pos_prv;
+
+	vec2 v_camera_dir_ws_xz = normalize([v_camera_dir_ws.x, v_camera_dir_ws.z]);
+	vec2 v_camera_dir_ws_prv_xz = normalize([v_camera_dir_ws_prv.x, v_camera_dir_ws_prv.z]);
+
+	float v_camera_dir_ws_xz_atan = atan2(v_camera_dir_ws_xz.x, v_camera_dir_ws_xz.y);
+	float v_camera_dir_ws_prv_xz_atan = atan2(v_camera_dir_ws_prv_xz.x, v_camera_dir_ws_prv_xz.y);
+
+	float camera_dir_movement_xz = v_camera_dir_ws_xz_atan - v_camera_dir_ws_prv_xz_atan;
+	float camera_dir_movement_xz = camera_dir_movement_xz > f_PI ? camera_dir_movement_xz - f_TWO_PI : camera_dir_movement_xz;
+	float camera_dir_movement_xz = camera_dir_movement_xz < -f_PI ? camera_dir_movement_xz + f_TWO_PI : camera_dir_movement_xz;
+
+	float camera_dir_movement_y = v_camera_dir_ws.y - v_camera_dir_ws_prv.y;
+
+	vec3 camera_pos_movement = v_camera_pos_ws - main_view_camera_pos_prv;
+	float camera_pos_movement_length = length(camera_pos_movement);
+	vec3 v_camera_right = normalize(cross(v_camera_dir_ws, [0.0, 1.0, 0.0]));
+	float camera_pos_movement_xz = dot(v_camera_right, camera_pos_movement);
+	float camera_pos_movement_y = camera_pos_movement.y;
+
+	float target_flashlight_offset_move_x = (camera_dir_movement_xz * 90 - camera_pos_movement_xz * 8) * delta_time * 60.0;
+	float target_flashlight_offset_move_y = (camera_dir_movement_y * 90 + camera_pos_movement_y * 15) * delta_time * 60.0;
+	float target_flashlight_offset_sway = 0.04 + camera_pos_movement_length * 2.0 * delta_time * 60.0;
+
+	float target_flashlight_offset_move_x = min(max(target_flashlight_offset_move_x, -110.0), 110.0) * f_flashlight_pp_sway;
+	float target_flashlight_offset_move_y = min(max(target_flashlight_offset_move_y, -110.0), 110.0) * f_flashlight_pp_sway;
+	float target_flashlight_offset_sway = min(target_flashlight_offset_sway, 0.15) * f_flashlight_pp_sway;
+	// framerate independent damping
+	float flashlight_damping_factor = -6.3;
+	float flashlight_damping_t = exp(flashlight_damping_factor * delta_time);
+	float flashlight_damping_t_inv = 1.0 - flashlight_damping_t;
+	float flashlight_pp_offset_move_x = f_pp_flashlight_pp_offset_move_x * flashlight_damping_t + target_flashlight_offset_move_x * flashlight_damping_t_inv;
+	float flashlight_pp_offset_move_y = f_pp_flashlight_pp_offset_move_y * flashlight_damping_t + target_flashlight_offset_move_y * flashlight_damping_t_inv;
+	float flashlight_pp_offset_sway = f_pp_flashlight_pp_offset_sway * flashlight_damping_t + target_flashlight_offset_sway * flashlight_damping_t_inv;
+
+	// flicker
+	extern float f_pp_flashlight_pp_flicker_on;
+	float target_flashlight_flicker_on = 1.0 - clamp(camera_pos_movement_length * delta_time * 60.0 * 20.0);
+	float flashlight_pp_flicker_on = f_pp_flashlight_pp_flicker_on * flashlight_damping_t + target_flashlight_flicker_on * flashlight_damping_t_inv;
+
+	Set("f_pp_flashlight_pp_offset_move_x", flashlight_pp_offset_move_x);
+	Set("f_pp_flashlight_pp_offset_move_y", flashlight_pp_offset_move_y);
+	Set("f_pp_flashlight_pp_offset_sway", flashlight_pp_offset_sway);
+	Set("f_pp_flashlight_pp_flicker_on", flashlight_pp_flicker_on);
+
+
+	// collimator movement
+	extern float f_pp_collimator_offset_move_x;
+	extern float f_pp_collimator_offset_move_y;
+
+	float collimator_offset_mult = 70.0; //how much cam movement affects dot mov - 70
+	float collimator_offset_move_x = camera_dir_movement_xz * collimator_offset_mult * delta_time;
+	float collimator_offset_move_y = camera_dir_movement_y * collimator_offset_mult * delta_time;
+
+	float collimator_damping_factor = -10.0; //how strong is the damping - how quickly the dot won't return to origin pos. must be negative - -10
+	float collimator_damping_t = exp(collimator_damping_factor * delta_time);
+	float collimator_damping_t_inv = 1.0 - collimator_damping_t;
+	float collimator_pp_offset_move_x = f_pp_collimator_offset_move_x * collimator_damping_t + collimator_offset_move_x * collimator_damping_t_inv;
+	float collimator_pp_offset_move_y = f_pp_collimator_offset_move_y * collimator_damping_t + collimator_offset_move_y * collimator_damping_t_inv;
+	float collimator_max_offset = 0.00035; //hard limit, mov accumulated by inertia - 0.005
+
+	Set("f_pp_collimator_offset_move_x", max(-collimator_max_offset, min(collimator_max_offset, collimator_pp_offset_move_x)));
+	Set("f_pp_collimator_offset_move_y", max(-collimator_max_offset, min(collimator_max_offset, collimator_pp_offset_move_y)));
+	// highlight time offset
+	
+	extern float f_highlight_1st_opacity;
+	extern float f_pp_highlight_1st_time;
+	float highlight_1st_time = f_pp_highlight_1st_time + delta_time;
+	float highlight_1st_time = f_highlight_1st_opacity > 0.0 ? highlight_1st_time : 0.0;
+	Set("f_pp_highlight_1st_time", highlight_1st_time);
+
+
+	use game_modify();
+	use game_overlay_modify();
+
+	extern vec3 v_camera_pos_ws;
+	extern vec3 v_camera_dir_ws;
+
+	Set("main_view_camera_pos_prv", v_camera_pos_ws);
+	Set("v_camera_dir_ws_prv", v_camera_dir_ws);
+
+	// Save prev values of fpp scale and anitfog for usage in correct motion
+	// vectors calculations
+	extern float f_fpp_scale_prv;
+	Set("f_pp_fpp_scale_prv", f_fpp_scale_prv);
+	extern float f_fpp_scale;
+	Set("f_fpp_scale_prv", f_fpp_scale);
+
+	extern float f_fpp_scale_2_prv;
+	Set("f_pp_fpp_scale_2_prv", f_fpp_scale_2_prv);
+	extern float f_fpp_scale_2;
+	Set("f_fpp_scale_2_prv", f_fpp_scale_2);
+
+	extern float f_antifov_scale_prv;
+	Set("f_pp_antifov_scale_prv", f_antifov_scale_prv);
+	extern float f_antifov_scale;
+	Set("f_antifov_scale_prv", f_antifov_scale);
+
+	//SmartGI Begin
+	Set("i_clear_smartgi", indoor_outdoor_changed ? 1 : 0);
+	//SmartGI End
+}

@@ -1,0 +1,142 @@
+
+ParamFloat("parking_brake_force_mod", 250.0)
+
+ParamFloat("front_wheel_y_offset", 0.0)
+ParamFloat("rear_wheel_y_offset", 0.0)
+
+ParamFloat("engine_torque", 196) // vanilla value 120 - determines how quick acceleration is
+ParamFloat("engine_torque_rev_mul", 0.8) // vanilla value 0.6 - dunno how to describe this :(
+ParamFloat("engine_resistant_torque", 8)
+ParamFloat("engine_resistant_torque_max_rpm_diff", 1800)
+ParamFloat("engine_resistant_torque_min_rpm_diff", -500)
+ParamFloat("engine_max_rpm", 12500) // vanilla value 5400
+ParamFloat("engine_stall_rpm", 900)
+
+ParamFloat("engine_free_rev_inertia", 0.2)
+ParamFloat("engine_free_rev_resistance", 5.0)
+ParamFloat("engine_free_momentum_transfer_factor", 0.3)
+
+ParamFloat("rear_slide_assist_factor", 0.8)
+
+// temporary measure to prevent too fast drive
+// should be set a bit higher and lower limit achieved through drag curves
+ParamFloat("top_speed_limit_kmh", 120) // vanilla value 66 - maximum speed when travelling via truck
+
+// Using this to simulate clutch disengaging during start
+ParamFloat("engine_low_vel_min_torque", 160.0)
+ParamFloat("engine_low_vel_threshold", 7.0)
+
+// This is an additional measure that can make starting faster, but it can cause instabilities
+ParamFloat("engine_start_wheel_inertia_mul", 1.0)
+
+ParamFloat("engine_nominal_rpm", 0)
+
+ParamFloat("gearbox_ratio_mul", 4.85) // vanilla value 4.5
+ParamFloat("gearbox_min_time_btw_reversing_shifts", 1.8)
+
+ParamFloat("gearbox_post_shift_engine_torque_mul", 0.0)
+ParamFloat("gearbox_post_shift_engine_resistance_mul", 1.0)
+
+ParamFloat("braking_torque", 1600)
+ParamFloat("braking_torque_neutral_mul", 0.2)
+
+ParamFloat("front_torque_mul", 0.8)
+ParamFloat("rear_torque_mul", 0.8)
+
+ParamFloat("wheel_resistant_torque", 100)
+
+ParamFloat("wheel_inertia", 70)
+ParamFloat("wheel_radius", 0.42)
+ParamInt("wheel_accel_subdivisions", 12)
+ParamFloat("wheel_max_contact_keep_time", 0.4)
+
+ParamFloat("front_long_force_mul", 1.0)
+ParamFloat("rear_long_force_mul", 1.0)
+ParamFloat("rear_long_force_handbrake_mul", 0.6)
+
+ParamFloat("front_lat_force_mul", 1.0)
+ParamFloat("rear_lat_force_mul", 1.3)
+ParamFloat("rear_lat_force_handbrake_mul", 0.90)
+
+ParamFloat("slope_force_reduction_factor", 0.0)
+ParamFloat("slope_slowdown_min_angle", 12.0)
+ParamFloat("slope_slowdown_max_angle", 25.0)
+
+ParamFloat("left_dir_front_lat_coeff", 0.3)
+
+ParamFloat("load_transfer_max_roll", 10.0)
+ParamFloat("load_transfer_roll_factor", 0.7)
+
+ParamFloat("load_transfer_max_pitch", 8.0)
+ParamFloat("load_transfer_pitch_factor", 0.6)
+
+ParamFloat("load_transfer_roll_spring_t", 1.2)
+ParamFloat("load_transfer_roll_spring_att", 1.0)
+
+ParamFloat("load_transfer_pitch_spring_t", 0.7)
+ParamFloat("load_transfer_pitch_spring_att", 0.8)
+
+ParamFloat("load_transfer_pitch_infl", 0.5)
+ParamFloat("load_transfer_roll_infl", 0.1)
+
+ParamFloat("load_transfer_max", 1.5)
+ParamFloat("load_transfer_min", 0.5)
+
+ParamFloat("physics_spring_rise", 0.15)
+ParamFloat("physics_spring_erp", 0.3)
+ParamFloat("physics_spring_cfm", 0.00030)
+
+ParamFloat("physics_max_angular_vel", 2.3)
+ParamFloat("physics_max_angular_vel_handbrake", 2.8)
+
+ParamFloat("physics_roll_compensation_factor", -1.0) 
+ParamFloat("physics_roll_compensation_spring_t", 0.1)
+ParamFloat("physics_roll_compensation_spring_att", 0.1)
+
+ParamFloat("physics_pitch_compensation_factor", 1.0)
+ParamFloat("physics_pitch_compensation_spring_t", 0.1)
+ParamFloat("physics_pitch_compensation_spring_att", 0.1)
+
+// bump compensation disabled - Needs more work
+ParamFloat("physics_bump_compensation_factor", 0.0)
+ParamFloat("physics_bump_compensation_spring_t", 0.05)
+ParamFloat("physics_bump_compensation_spring_att", 0.03)
+
+ParamFloat("wheel_max_turn", 0.75)
+ParamFloat("wheel_max_turn_max_vel_mul", 0.5)
+ParamFloat("wheel_max_turn_max_vel", 18.0)
+ParamFloat("wheel_max_turn_min_vel", 4.0)
+
+ParamBool("use_responsive_turn_input", 1)
+ParamFloat("wheel_turn_speed_min", 0.2)
+ParamFloat("wheel_turn_speed_max", 4.0)
+ParamFloat("wheel_turn_slowdown_max_vel", 16.0)
+ParamFloat("wheel_turn_slowdown_max", 2.0)
+
+ParamVec("repair_trigger_local_pos", 0.5, 1.2, -1.2)
+ParamString("repair_item_required", "DLC_FT_Car_Repair_Kit")
+
+ParamFloat("air_control_extrapolation_time", 0.3)
+ParamFloat("air_control_pitch_correction_factor", 1.5)
+ParamFloat("air_control_roll_correction_factor", 2.0)
+
+// Seems dead code anyway, as we only apply slowdown on non ragdoll physics, which happens once for 99% hits. Needs investigation
+ParamFloat("slowdown_decrased_tempo", 8.0)
+ParamFloat("slowdown_influence", 4000.0)
+ParamFloat("slowdown_mul_huge_ai", 2.0)
+
+ParamFloat("ragdoll_wheel_bump_force_factor", 8.0)
+
+ParamInt("max_history_entries", 20)
+ParamFloat("history_entries_interval", 1.0)
+ParamFloat("position_reset_rewind_time", 1.0)
+
+ParamFloat("uv_active_time", 7.0)  // 15s of running time because of activation cost
+ParamFloat("uv_cooldown", 20.0) // how long it regenerates if you deplete it completely
+ParamFloat("uv_recharge_speed", 0.5)    // how fast uv regenerates when it's not in cooldown mode
+ParamFloat("uv_activation_cost", 2.0)   
+
+
+ParamFloat("aggro_noise_fast_speed_threshold", 12.0)
+ParamString("aggro_noise_fast_name","vehicle_engine_noise_fast")
+ParamString("aggro_noise_slow_name","vehicle_engine_noise_slow")

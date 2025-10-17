@@ -1,0 +1,11 @@
+sub main()
+{
+	RarityHoldTime("White", 0.40);
+	RarityHoldTime("Green", 0.40);
+	RarityHoldTime("Blue", 0.40);
+	RarityHoldTime("Violet", 0.40);
+	RarityHoldTime("Orange", 0.40);
+	RarityHoldTime("Limited", 0.40);
+	RarityHoldTime("Platinum", 0.40);
+	RarityHoldTime("Exotic", 0.40);
+}

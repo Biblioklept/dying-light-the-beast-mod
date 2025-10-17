@@ -1,0 +1,88 @@
+sub main()
+{
+    PriceModifier("default_buy")
+    {
+        Value(0, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        
+    }
+    
+    PriceModifier("default_sell")
+    {
+        Value(0, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(1, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(2, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(3, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);
+        Value(4, 0);        
+    }
+}
+
