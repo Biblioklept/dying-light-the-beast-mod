@@ -76,10 +76,6 @@ Mod merge is provided as is. If errors occur please report to this GitHub page i
 
 > Increases save slots to 10, so you can have more than 4 saves.
 
-* [Remove Water Effect On Screen](https://www.nexusmods.com/dyinglightthebeast/mods/96)
-
-> Removes the water drops effect that appear on screen when you get out of water.
-
 * [Load Custom RPacks](https://www.nexusmods.com/dyinglightthebeast/mods/99)
 
 > Makes you able to load custom named RPacks, with the ability to override vanilla .rpack content with yours, not needing to inject/repack rpacks every new update.
